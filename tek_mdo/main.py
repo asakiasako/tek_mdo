@@ -462,10 +462,10 @@ class ModelMDO34(VisaInstrument):
         
         Args:
             ch_num: The number of the channel. Valid values are: `1` | `2` | `3` | `4`
-            coupling: The attenuator coupling setting. Options are: `AC`, `DC`, `DCREJect`
+            coupling: The attenuator coupling setting. Options are: `AC`, `DC`, `DCREJECT`
         """
         self._check_ch_num(ch_num)
-        if not coupling in {'AC', 'DC', 'DCREJect'}:
+        if not coupling in {'AC', 'DC', 'DCREJECT'}:
             raise ValueError(f'Invalid coupling: {coupling!r}')
         cmd = f'CH{ch_num:d}:COUPling {coupling}'
         self.command(cmd)
@@ -481,7 +481,7 @@ class ModelMDO34(VisaInstrument):
         """
         self._check_ch_num(ch_num)
         cmd = f'CH{ch_num:d}:COUPling?'
-        return self.query(cmd).strip()
+        return self.query(cmd).strip().upper()
 
     def set_channel_bandwidth(self, ch_num: int, bandwidth: int | float) -> None:
         """"""
@@ -557,9 +557,9 @@ class ModelMDO34(VisaInstrument):
         
         Args:
             num: The number of the math channel.
-            math_type: The math type. Valid values are: `DUAL` | `FFT` | `ADVanced` | `SPECTRUM`
+            math_type: The math type. Valid values are: `DUAL` | `FFT` | `ADVANCED` | `SPECTRUM`
         """
-        if math_type not in {'DUAL', 'FFT', 'ADVanced', 'SPECTRUM'}:
+        if math_type not in {'DUAL', 'FFT', 'ADVANCED', 'SPECTRUM'}:
             raise ValueError(f'Invalid value for math_type: {math_type}')
         cmd = f'MATH{num:d}:TYPe {math_type}'
         self.command(cmd)
@@ -574,7 +574,7 @@ class ModelMDO34(VisaInstrument):
             The math type.
         """
         cmd = f'MATH{num:d}:TYPe?'
-        return self.query(cmd)
+        return self.query(cmd).strip().upper()
 
     def set_math_channel_function(self, num: int, function: str) -> None:
         """Define the math function with a text string.
@@ -614,7 +614,7 @@ class ModelMDO34(VisaInstrument):
         Returns:
             The horizontal scale in seconds.
         """
-        cmd = f'HORizontal:SCAle?'
+        cmd = 'HORizontal:SCAle?'
         scale = float(self.query(cmd))
         return scale
 
@@ -635,6 +635,120 @@ class ModelMDO34(VisaInstrument):
         Returns:
             The horisontal position in percent.
         """
-        cmd = f'HORizontal:POSition?'
+        cmd = 'HORizontal:POSition?'
         position = float(self.query(cmd))
         return position
+
+    def set_trigger_a_type(self, trigger_type: str) -> None:
+        """Sets the type of A trigger (either edge, logic, pulse, bus or 
+        video).
+        
+        Args:
+            trigger_type: `EDGE` | `LOGIC` | `PULSE` | `BUS` | `VIDEO`
+        """
+        if not trigger_type in {'EDGE', 'LOGIC', 'PULSE', 'BUS', 'VIDEO'}:
+            raise ValueError(f'Invalid trigger_type: {trigger_type!r}')
+        cmd = f'TRIGger:A:TYPe {trigger_type}'
+        self.command(cmd)
+
+    def get_trigger_a_type(self) -> str:
+        """Queries the type of A trigger (either edge, logic, pulse, bus or 
+        video).
+        
+        Returns:
+            The trigger type, options are `EDGE` | `LOGIC` | `PULSE` | `BUS` | `VIDEO`
+        """
+        cmd = 'TRIGger:A:TYPe?'
+        return self.query(cmd).strip().upper()
+
+    def set_trigger_a_edge_coupling(self, coupling: str) -> None:
+        """Specifies the type of coupling for the A edge trigger.
+        
+        Args:
+            coupling: Options are `AC`, `DC`, `HFREJ`, `LFREJ`, `NOISEREJ`
+        """
+        if not coupling in {'AC', 'DC', 'HFREJ', 'LFREJ', 'NOISEREJ'}:
+            raise ValueError(f'Invalid coupling: {coupling!r}')
+        cmd = f'TRIGger:A:EDGE:COUPling {coupling}'
+        self.command(cmd)
+
+    def get_trigger_a_edge_coupling(self) -> str:
+        """Sets the type of coupling for the A edge trigger.
+        
+        Returns:
+            Options are `AC`, `DC`, `HFREJ`, `LFREJ`, `NOISEREJ`
+        """
+        cmd = 'TRIGger:A:EDGE:COUPling?'
+        return self.query(cmd).strip().upper()
+
+    def set_trigger_a_edge_slope(self, slope: str) -> None:
+        """Specifies the slope for the A edge trigger: rising, falling or 
+        either.
+        
+        Args:
+            slope: The slope for the A edge trigger, options are: `RISE` | `FALL` | `EITHER`
+        """
+        if not slope in {'RISE', 'FALL', 'EITHER'}:
+            raise ValueError(f'Invalid value for slope: {slope!r}')
+        cmd = 'TRIGger:A:EDGE:SLOpe {slope}'
+        self.command(cmd)
+
+    def get_trigger_a_edge_slope(self) -> str:
+        """Queries the slope for the A edge trigger: rising, falling or 
+        either.
+        
+        Returns:
+            The slope for the A edge trigger, options are: `RISE` | `FALL` | `EITHER`
+        """
+        cmd = 'TRIGger:A:EDGE:SLOpe?'
+        return self.query(cmd).strip().upper()
+
+    def set_trigger_a_edge_source(self, src: str) -> None:
+        """Specifies the source for the A edge trigger.
+        
+        Args:
+            src: The source for the A edge trigger, options are: `CH1` | `CH2` | `CH3` | `CH4`
+        """
+        if not src in {'CH1', 'CH2', 'CH3', 'CH4'}:
+            raise ValueError(f'Invalid value for src: {src!r}')
+        cmd = f'TRIGger:A:EDGE:SOUrce {src}'
+        self.command(cmd)
+
+    def get_trigger_a_edge_source(self, src: str) -> None:
+        """Queries the source for the A edge trigger.
+        
+        Returns:
+            The source for the A edge trigger, options are: `CH1` | `CH2` | `CH3` | `CH4`
+        """
+        cmd = 'TRIGger:A:EDGE:SOUrce?'
+        return self.query(cmd).strip()
+
+    def set_trigger_a_level(self, ch_num: int, level: int | float) -> None:
+        """Sets the threshold voltage level to use for trigger when triggering 
+        on an analog channel waveform. Each channel can have an independent
+        trigger level.
+        
+        Args:
+            ch_num: The number of the channel. Valid values are: `1` | `2` | `3` | `4`
+            level: The trigger threshold level in Volts.
+        """
+        self._check_ch_num(ch_num)
+        cmd = f'TRIGger:A:LEVel:CH{ch_num:d} {level:.4E}'
+        self.command(cmd)
+
+    def get_trigger_a_level(self, ch_num: int) -> float:
+        """Queries the threshold voltage level to use for trigger when triggering 
+        on an analog channel waveform. Each channel can have an independent
+        trigger level.
+        
+        Args:
+            ch_num: The number of the channel. Valid values are: `1` | `2` | `3` | `4`
+        
+        Returns:
+            The trigger threshold level in Volts.
+        """
+        cmd = f'TRIGger:A:LEVel:CH{ch_num:d}?'
+        level = float(self.query(cmd))
+        return level
+
+    
